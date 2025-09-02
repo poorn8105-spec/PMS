@@ -779,6 +779,14 @@ ALTER TABLE feature_toggles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE follow_ups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE treatment_types ENABLE ROW LEVEL SECURITY;
 
+-- Enable RLS on missing tables
+ALTER TABLE disabled_slots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE treatment_plans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE medical_records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE patient_phones ENABLE ROW LEVEL SECURITY;
+ALTER TABLE dental_notes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE prescription_history ENABLE ROW LEVEL SECURITY;
+
 -- Create policies for all tables (allow all operations for now)
 -- You can restrict these later based on your security needs
 CREATE POLICY "Allow all operations on clinics" ON clinics FOR ALL USING (true);
