@@ -1,4 +1,4 @@
-// Service Worker Registration - Only on admin routes
+h// Service Worker Registration - Only on admin routes
 if('serviceWorker' in navigator) {
   // Check if we're on an admin route
   const isAdminRoute = window.location.pathname.startsWith('/admin');
