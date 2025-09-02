@@ -156,15 +156,25 @@ async function collectClinicData() {
     try {
       const supabase = createClient(data.supabaseUrl, data.supabaseKey);
       
-      // Test basic connection by checking if we can reach the API
-      // We'll use a simple RPC call that should work even on empty databases
-      const { error: testError } = await supabase.rpc('version');
+      // Test actual connection by trying to access the API
+      // This will fail if credentials are wrong
+      const { data: testData, error: testError } = await supabase
+        .from('_connection_test_')
+        .select('*')
+        .limit(1);
       
-      // If version() fails, try a simple connection test
+      // We expect this specific error for non-existent table
+      // Any other error means connection failed
       if (testError) {
-        // Just verify the client can be created and basic connectivity works
-        // The real test will be when we try to create tables
-        console.log('⚠️ Basic connection test passed (will verify during setup)\n');
+        if (testError.message.includes('relation "_connection_test_" does not exist')) {
+          console.log('✅ Database connection successful!\n');
+        } else if (testError.message.includes('JWT')) {
+          throw new Error('Invalid Supabase credentials - please check your URL and key');
+        } else if (testError.message.includes('fetch')) {
+          throw new Error('Cannot reach Supabase - please check your URL');
+        } else {
+          throw new Error(`Connection failed: ${testError.message}`);
+        }
       } else {
         console.log('✅ Database connection successful!\n');
       }
