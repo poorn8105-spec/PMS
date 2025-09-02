@@ -39,7 +39,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Clinics table
 CREATE TABLE IF NOT EXISTS clinics (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,ng 
   slug VARCHAR(100) UNIQUE NOT NULL,
   domain VARCHAR(255),
   logo_url VARCHAR(500),
@@ -815,86 +815,11 @@ CREATE POLICY "Allow all operations on follow_ups" ON follow_ups FOR ALL USING (
 CREATE POLICY "Allow all operations on treatment_types" ON treatment_types FOR ALL USING (true);
 
 -- =====================================================
--- 14. DEFAULT CLINIC SETUP
+-- 14. DATABASE STRUCTURE COMPLETE
 -- =====================================================
-
--- Insert default clinic
-INSERT INTO clinics (name, slug, contact_phone, contact_email, address) 
-VALUES (
-  'Jeshna Dental Clinic',
-  'jeshna-dental',
-  '6363116263',
-  'poorn8105@gmail.com',
-  'Bangalore, Karnataka'
-) ON CONFLICT (slug) DO NOTHING;
-
--- Insert default scheduling settings
-INSERT INTO scheduling_settings (clinic_id, day_schedules, notification_settings, show_stats_cards, dental_numbering_system) 
-SELECT 
-  c.id,
-  '{
-    "0": {"start_time": "10:00", "end_time": "18:00", "break_start": ["13:00"], "break_end": ["14:00"], "slot_interval_minutes": 30, "enabled": false},
-    "1": {"start_time": "09:00", "end_time": "20:00", "break_start": ["13:00"], "break_end": ["14:00"], "slot_interval_minutes": 30, "enabled": true},
-    "2": {"start_time": "09:00", "end_time": "20:00", "break_start": ["13:00"], "break_end": ["14:00"], "slot_interval_minutes": 30, "enabled": true},
-    "3": {"start_time": "09:00", "end_time": "20:00", "break_start": ["13:00"], "break_end": ["14:00"], "slot_interval_minutes": 30, "enabled": true},
-    "4": {"start_time": "09:00", "end_time": "20:00", "break_start": ["13:00"], "break_end": ["14:00"], "slot_interval_minutes": 30, "enabled": true},
-    "5": {"start_time": "09:00", "end_time": "20:00", "break_start": ["13:00"], "break_end": ["14:00"], "slot_interval_minutes": 30, "enabled": true},
-    "6": {"start_time": "09:00", "end_time": "18:00", "break_start": ["13:00"], "break_end": ["14:00"], "slot_interval_minutes": 30, "enabled": false}
-  }',
-  '{"email_notifications": true, "reminder_hours": 24, "auto_confirm": true}',
-  true,
-  'universal'
-FROM clinics c 
-WHERE c.slug = 'jeshna-dental'
-ON CONFLICT (clinic_id) DO NOTHING;
-
--- Insert default feature toggles
-INSERT INTO feature_toggles (clinic_id, feature_name, is_enabled, description) 
-SELECT 
-  c.id,
-  feature_name,
-  is_enabled,
-  description
-FROM clinics c 
-CROSS JOIN (
-  VALUES 
-    ('appointment_booking', true, 'Enable online appointment booking'),
-    ('patient_portal', true, 'Enable patient portal access'),
-    ('payment_system', true, 'Enable payment tracking system'),
-    ('email_notifications', true, 'Enable email notifications'),
-    ('whatsapp_notifications', true, 'Enable WhatsApp notifications'),
-    ('dental_chart', true, 'Enable interactive dental chart'),
-    ('analytics', true, 'Enable analytics and reporting'),
-    ('staff_management', true, 'Enable staff and permission management'),
-    ('lab_work', true, 'Enable lab work tracking'),
-    ('prescriptions', true, 'Enable prescription management')
-) AS features(feature_name, is_enabled, description)
-WHERE c.slug = 'jeshna-dental'
-ON CONFLICT (clinic_id, feature_name) DO NOTHING;
-
--- Insert default treatment types
-INSERT INTO treatment_types (clinic_id, name, description, category, cost, duration_minutes) 
-SELECT 
-  c.id,
-  treatment_name,
-  description,
-  category,
-  cost,
-  duration_minutes
-FROM clinics c 
-CROSS JOIN (
-  VALUES 
-    ('Dental Cleaning', 'Professional dental cleaning and scaling', 'preventive', 1500.00, 60),
-    ('Cavity Filling', 'Tooth cavity filling with composite material', 'restorative', 2500.00, 90),
-    ('Root Canal', 'Complete root canal treatment', 'surgical', 8000.00, 120),
-    ('Tooth Extraction', 'Simple tooth extraction', 'surgical', 3000.00, 60),
-    ('Dental Crown', 'Porcelain crown placement', 'restorative', 12000.00, 120),
-    ('Teeth Whitening', 'Professional teeth whitening treatment', 'cosmetic', 5000.00, 90),
-    ('Braces Consultation', 'Orthodontic consultation and planning', 'orthodontic', 1000.00, 30),
-    ('X-Ray Imaging', 'Dental X-ray examination', 'diagnostic', 800.00, 30)
-) AS treatments(treatment_name, description, category, cost, duration_minutes)
-WHERE c.slug = 'jeshna-dental'
-ON CONFLICT (clinic_id, name) DO NOTHING;
+-- 
+-- All tables, functions, triggers, and RLS policies have been created.
+-- The setup script will now create the clinic data and configuration.
 
 -- =====================================================
 -- ✅ SETUP COMPLETE!
@@ -906,7 +831,7 @@ ON CONFLICT (clinic_id, name) DO NOTHING;
 -- ✅ Functions for data retrieval and manipulation
 -- ✅ Triggers for automatic timestamp updates
 -- ✅ Row Level Security (RLS) policies
--- ✅ Default clinic and settings
+-- ✅ Database structure only (no default data)
 -- 
 -- TABLES CREATED:
 -- ✅ Core: clinics, appointments, scheduling_settings, disabled_slots
