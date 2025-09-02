@@ -156,31 +156,31 @@ async function collectClinicData() {
     try {
       const supabase = createClient(data.supabaseUrl, data.supabaseKey);
       
-      // Test actual connection by trying to access the API
-      // This will fail if credentials are wrong
-      const { data: testData, error: testError } = await supabase
-        .from('_connection_test_')
-        .select('*')
-        .limit(1);
-      
-      // We expect this specific error for non-existent table
-      // Any other error means connection failed
-      if (testError) {
-        if (testError.message.includes('relation "_connection_test_" does not exist')) {
-          console.log('✅ Database connection successful!\n');
-        } else if (testError.message.includes('JWT')) {
-          throw new Error('Invalid Supabase credentials - please check your URL and key');
-        } else if (testError.message.includes('fetch')) {
-          throw new Error('Cannot reach Supabase - please check your URL');
-        } else {
-          throw new Error(`Connection failed: ${testError.message}`);
+      // Test connection by making a simple HTTP request to the Supabase URL
+      // This will fail if the URL is wrong or unreachable
+      const testUrl = `${data.supabaseUrl}/rest/v1/`;
+      const response = await fetch(testUrl, {
+        method: 'GET',
+        headers: {
+          'apikey': data.supabaseKey,
+          'Authorization': `Bearer ${data.supabaseKey}`
         }
-      } else {
+      });
+      
+      if (response.status === 200 || response.status === 401) {
+        // 200 = success, 401 = unauthorized (but reachable)
         console.log('✅ Database connection successful!\n');
+      } else if (response.status === 404) {
+        throw new Error('Invalid Supabase URL - please check your project URL');
+      } else {
+        throw new Error(`Connection failed with status: ${response.status}`);
       }
     } catch (error) {
-      console.log(`❌ Error: Database connection failed: ${error.message}\n`);
-      continue;
+      if (error.message.includes('fetch')) {
+        throw new Error('Cannot reach Supabase - please check your URL and internet connection');
+      } else {
+        throw new Error(`Database connection failed: ${error.message}`);
+      }
     }
 
     // Step 2: Email Configuration (Resend)
