@@ -155,7 +155,23 @@ async function collectClinicData() {
     console.log('\n🔗 Testing database connection...');
     try {
       const supabase = createClient(data.supabaseUrl, data.supabaseKey);
-      // Just verify we can create a client - don't test tables that don't exist yet
+      
+      // Actually test the connection by making a simple API call
+      const { data: testData, error: testError } = await supabase.auth.getUser();
+      
+      if (testError) {
+        // If auth fails, try a simple query to test connection
+        const { error: queryError } = await supabase
+          .from('_dummy_test_table_')
+          .select('*')
+          .limit(1);
+        
+        // We expect this to fail with "relation does not exist", but it should connect
+        if (queryError && !queryError.message.includes('relation "_dummy_test_table_" does not exist')) {
+          throw new Error(`Database connection failed: ${queryError.message}`);
+        }
+      }
+      
       console.log('✅ Database connection successful!\n');
     } catch (error) {
       console.log(`❌ Error: Database connection failed: ${error.message}\n`);
