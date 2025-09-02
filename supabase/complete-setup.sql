@@ -39,7 +39,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Clinics table
 CREATE TABLE IF NOT EXISTS clinics (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,ng 
+  name VARCHAR(255) NOT NULL, 
   slug VARCHAR(100) UNIQUE NOT NULL,
   domain VARCHAR(255),
   logo_url VARCHAR(500),
