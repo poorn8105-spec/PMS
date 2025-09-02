@@ -24,6 +24,14 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+-- Create exec_sql function for dynamic SQL execution
+CREATE OR REPLACE FUNCTION exec_sql(sql_query TEXT)
+RETURNS VOID AS $$
+BEGIN
+  EXECUTE sql_query;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- =====================================================
 -- 1. CORE CLINIC TABLES
 -- =====================================================
